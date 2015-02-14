@@ -1,4 +1,4 @@
-# codeholic's FuseFinder script v0.1.0
+# codeholic's FuseFinder script v0.2.0
 #   Creates a new layer called "FuseTestLayer"
 #   Writes to a FuseFinder subfolder in Golly's data directory.
 #   Updates screen every hundred trials (why not?)
@@ -16,7 +16,7 @@ import itertools
 import math
 
 MAX_FUSE_PACE     = 10   # how many ticks it takes to burn one cell
-MAX_FUSE_LENGTH   = 500  # how long the test fuse is
+MAX_FUSE_LENGTH   = 1000 # how long the test fuse is
 MAX_IGNITION_TIME = 1000 # how long we wait for a fuse to be ignited
 BASE = 16
 
@@ -63,19 +63,12 @@ SOUP_SIZE = 16
 SOUPSPERDISPLAY = 100
 
 def hashsoup(instring):
-
     s = hashlib.sha256(instring).digest()
-
     thesoup = []
-
     for j in xrange(32):
-
         t = ord(s[j])
-
         for k in xrange(8):
-
             if (t & (1 << (7 - k))):
-
                 thesoup.append(k + 8*(j % 2))
                 thesoup.append(int(j / 2))
 
@@ -106,14 +99,20 @@ while True:
   #mark = time.clock()
   g.setbase(BASE)
   g.setstep(step)
-  g.step()
 
   #gen_time +=time.clock()-mark
   #mark = time.clock()
-  test = g.getcells(TESTRECT)
+  changed = True
+  for _ in range(0, 2):
+    g.step()
+    test = g.getcells(TESTRECT)
+    if patterns_identical(test, cells):
+      changed = False
+      break
+
   count += 1
 
-  if not patterns_identical(test, cells):
+  if changed:
     g.reset()
     g.save(os.path.join(outpath, FUSENAME + str(count) + '.rle'), 'rle')
     g.show("Saved fuse to " + outpath + FUSENAME + str(count) + ".rle")
